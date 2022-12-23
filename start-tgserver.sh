@@ -19,7 +19,14 @@ echo "::group::Starting TigerGraph Server"
 echo "  - version [$TGSERVER_VERSION]"
 echo ""
 
-docker run --name tigergraph -d -p 14022:22 -p 9000:9000 -p 14240:14240 --ulimit nofile=1000000:1000000 -v ~/data:/home/tigergraph/mydata -t tigergraph/tigergraph:$TGSERVER_VERSION
+docker run --name tigergraph -d \
+    -p 14022:22 \
+    -p 9000:9000 \
+    -p 14240:14240 \
+    --ulimit nofile=1000000:1000000 \
+    -v ~/data:/home/tigergraph/mydata \
+    -v tg-data:/home/tigergraph \
+    -t tigergraph/tigergraph:$TGSERVER_VERSION
 
 if [ $? -ne 0 ]; then
     echo "Error starting TGSERVER Docker container"
@@ -32,7 +39,10 @@ echo "::group:: Waiting for TGSERVER to accept connections"
 sleep 1
 TIMER=0
 
-until docker exec -it $(docker ps | grep tigergraph | awk '{print $1}') /bin/sh # &> /dev/null
+
+docker exec -u tigergraph --workdir /home/tigergraph/tigergraph/app/cmd tigergraph ./gadmin start all
+
+until docker exec -u tigergraph --workdir /home/tigergraph/tigergraph/app/cmd tigergraph ./gadmin status &> /dev/null
 do
   sleep 1
   echo "."

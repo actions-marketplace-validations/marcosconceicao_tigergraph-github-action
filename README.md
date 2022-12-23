@@ -30,7 +30,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Start Tigergraph Server
-      uses: marcosconceicao/tigergraph-github-action@v1
+      uses: marcosconceicao/tigergraph-github-action@v2
       with:
         tgserver-version: ${{ matrix.tgserver-version }}
 
