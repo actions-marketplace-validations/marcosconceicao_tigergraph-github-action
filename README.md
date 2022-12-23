@@ -1,21 +1,42 @@
-# Hello world docker action
+# Introduction
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+This GitHub Action starts TigerGraph Server with the default ports (9000 and 14240).
 
-## Inputs
+The TG Server  version must be specified using the tgserver-version input. The used version must exist in the published tigergraph Docker hub tags. Default value is latest, other popular choices are 3.6.0, 3.7.0, 3.8.0.
 
-## `who-to-greet`
-
-**Required** The name of the person to greet. Default `"World"`.
-
-## Outputs
-
-## `time`
-
-The time we greeted you.
+This is useful when running tests against a TigerGraph Server database.
 
 ## Example usage
 
-uses: actions/hello-world-docker-action@v2
-with:
-  who-to-greet: 'Mona the Octocat'
+```yaml
+name: Run tests
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tgserver-version: ['3.7.0', '3.8.0']
+
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Start Tigergraph Server
+      uses: marcosconceicao/tigergraph-github-action@v1
+      with:
+        tgserver-version: ${{ matrix.tgserver-version }}
+
+    - run: npm install
+
+    - run: npm test
+      env:
+        CI: true
+```
